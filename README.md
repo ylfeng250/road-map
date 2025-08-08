@@ -23,6 +23,12 @@ npm run build
 
 本项目配置了自动部署到 GitHub Pages 的 GitHub Actions 工作流。
 
+### 重要说明
+
+- 项目已配置为在 GitHub Pages 环境下正确加载静态资源
+- `routes.json` 文件已放置在 `public` 目录中，确保构建时被正确复制
+- 应用会自动检测部署环境并调整资源路径
+
 ### 设置步骤：
 
 1. **启用 GitHub Pages**
