@@ -10,6 +10,19 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children, title, subtitle }) => {
+  const [isMobile, setIsMobile] = React.useState(false);
+
+  React.useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   return (
     <div style={{
       minHeight: '100vh',
@@ -21,7 +34,7 @@ const Layout: React.FC<LayoutProps> = ({ children, title, subtitle }) => {
       
       <main style={{
         flex: 1,
-        padding: '0 16px',
+        padding: isMobile ? '0 8px' : '0 16px',
         maxWidth: '1200px',
         width: '100%',
         margin: '0 auto',

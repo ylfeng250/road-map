@@ -7,11 +7,24 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ title, subtitle }) => {
+  const [isMobile, setIsMobile] = React.useState(false);
+
+  React.useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   return (
     <header style={{
       textAlign: 'center',
-      marginBottom: spacing.xxl,
-      padding: `${spacing.xl} ${spacing.md}`,
+      marginBottom: isMobile ? spacing.xl : spacing.xxl,
+      padding: isMobile ? `${spacing.lg} ${spacing.sm}` : `${spacing.xl} ${spacing.md}`,
       background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.primary}99 100%)`,
       color: 'white',
       boxShadow: colors.elevation.medium,
@@ -20,7 +33,7 @@ const Header: React.FC<HeaderProps> = ({ title, subtitle }) => {
     }}>
       
       <h1 style={{
-        fontSize: typography.fontSize.xxl,
+        fontSize: isMobile ? typography.fontSize.xl : typography.fontSize.xxl,
         fontWeight: typography.fontWeight.bold,
         margin: 0,
         position: 'relative',
@@ -40,11 +53,12 @@ const Header: React.FC<HeaderProps> = ({ title, subtitle }) => {
       
       {subtitle && (
         <p style={{
-          fontSize: typography.fontSize.md,
+          fontSize: isMobile ? typography.fontSize.sm : typography.fontSize.md,
           marginTop: spacing.md,
           opacity: 0.9,
           maxWidth: '600px',
           margin: `${spacing.md} auto 0`,
+          padding: isMobile ? `0 ${spacing.sm}` : 0,
         }}>
           {subtitle}
         </p>

@@ -10,12 +10,25 @@ const RoadMap: React.FC = () => {
   const [routes, setRoutes] = useState<Route[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
   
   // 筛选条件
   const [selectedCity, setSelectedCity] = useState('');
   const [selectedArea, setSelectedArea] = useState('');
   const [selectedDistanceRange, setSelectedDistanceRange] = useState('');
   const [selectedAscentRange, setSelectedAscentRange] = useState('');
+
+  // 检测移动设备
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // 加载路线数据
   useEffect(() => {
@@ -148,9 +161,10 @@ const RoadMap: React.FC = () => {
       {/* 路线统计 */}
       <div style={{
         textAlign: 'center',
-        marginBottom: spacing.xl,
+        marginBottom: isMobile ? spacing.lg : spacing.xl,
         color: colors.text.secondary,
         fontSize: '14px',
+        padding: isMobile ? `0 ${spacing.sm}` : 0,
       }}>
         共找到 <span style={{ fontWeight: 'bold', color: colors.primary }}>{filteredRoutes.length}</span> 条路线
       </div>
@@ -159,9 +173,12 @@ const RoadMap: React.FC = () => {
       {filteredRoutes.length > 0 ? (
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-          gap: spacing.xl,
+          gridTemplateColumns: isMobile 
+            ? 'repeat(auto-fill, minmax(280px, 1fr))' 
+            : 'repeat(auto-fill, minmax(320px, 1fr))',
+          gap: isMobile ? spacing.md : spacing.xl,
           justifyItems: 'center',
+          padding: isMobile ? spacing.sm : 0,
         }}>
           {filteredRoutes.map((route, idx) => (
             <RouteCard key={idx} route={route} />

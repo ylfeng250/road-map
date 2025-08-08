@@ -34,14 +34,34 @@ interface RouteCardProps {
 }
 
 const RouteCard: React.FC<RouteCardProps> = ({ route }) => {
+  // 使用媒体查询检测是否为移动设备
+  const [isMobile, setIsMobile] = React.useState(false);
+
+  React.useEffect(() => {
+    // 检测屏幕宽度
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768); // 768px 是常见的平板断点
+    };
+    
+    // 初始检测
+    checkMobile();
+    
+    // 监听窗口大小变化
+    window.addEventListener('resize', checkMobile);
+    
+    // 清理监听器
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   return (
     <div 
       style={{
         background: colors.cardBg,
         borderRadius: borderRadius.lg,
         boxShadow: colors.elevation.medium,
-        padding: spacing.lg,
-        width: '320px',
+        padding: isMobile ? spacing.md : spacing.lg,
+        width: isMobile ? '100%' : '320px',
+        maxWidth: '100%',
         border: `1px solid ${colors.border}`,
         transition: animation.transition.normal,
         overflow: 'hidden',
@@ -52,10 +72,13 @@ const RouteCard: React.FC<RouteCardProps> = ({ route }) => {
       {/* 城市和区域标签 */}
       <div style={{
         position: 'absolute',
-        top: spacing.md,
-        right: spacing.md,
+        top: isMobile ? spacing.sm : spacing.md,
+        right: isMobile ? spacing.sm : spacing.md,
         display: 'flex',
         gap: spacing.xs,
+        flexWrap: 'wrap',
+        maxWidth: isMobile ? '120px' : 'auto',
+        justifyContent: 'flex-end',
       }}>
         <div style={{
           background: colors.secondary,
@@ -83,9 +106,10 @@ const RouteCard: React.FC<RouteCardProps> = ({ route }) => {
       <h3 style={{ 
         margin: `0 0 ${spacing.md} 0`, 
         color: colors.primary,
-        fontSize: typography.fontSize.xl,
+        fontSize: isMobile ? typography.fontSize.lg : typography.fontSize.xl,
         fontWeight: typography.fontWeight.bold,
-        paddingRight: '60px', // 为城市标签留出空间
+        paddingRight: isMobile ? '80px' : '120px', // 为城市和区域标签留出空间
+        wordBreak: 'break-word', // 确保长词可以换行
       }}>
         {route.name}
       </h3>

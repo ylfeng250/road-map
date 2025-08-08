@@ -48,12 +48,15 @@ const RouteFilter: React.FC<RouteFilterProps> = ({ routes, onFilterChange }) => 
   const [distanceRange, setDistanceRange] = React.useState('');
   const [ascentRange, setAscentRange] = React.useState('');
 
+  // 使用媒体查询检测是否为移动设备
+  const [isMobile, setIsMobile] = React.useState(false);
+
   // 当筛选条件变化时通知父组件
   React.useEffect(() => {
     onFilterChange(city, area, distanceRange, ascentRange);
   }, [city, area, distanceRange, ascentRange, onFilterChange]);
 
-  const selectStyle = {
+  const selectStyle = React.useMemo(() => ({
     padding: `${spacing.sm} ${spacing.md}`,
     borderRadius: borderRadius.md,
     border: `1px solid ${colors.border}`,
@@ -63,140 +66,119 @@ const RouteFilter: React.FC<RouteFilterProps> = ({ routes, onFilterChange }) => 
     cursor: 'pointer',
     outline: 'none',
     transition: '0.2s ease',
-    width: '100%', // 使下拉框填满容器宽度
-    maxWidth: '180px', // 限制最大宽度
-    margin: '0 auto', // 在容器中居中
+    width: isMobile ? 'calc(100% - 70px)' : '100%', // 移动端考虑标签宽度
+    maxWidth: isMobile ? 'none' : '180px', // 移动端不限制最大宽度
+    margin: isMobile ? '0' : '0 auto', // 移动端不需要居中
+    display: 'inline-block',
+  }), [isMobile]);
+
+  
+
+  React.useEffect(() => {
+    // 检测屏幕宽度
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768); // 768px 是常见的平板断点
+    };
+    
+    // 初始检测
+    checkMobile();
+    
+    // 监听窗口大小变化
+    window.addEventListener('resize', checkMobile);
+    
+    // 清理监听器
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // 定义 FilterItem 组件
+  const FilterItem: React.FC<{
+    label: string;
+    value: string;
+    options: FilterOption[];
+    onChange: (value: string) => void;
+    isMobile: boolean;
+  }> = ({ label, value, options, onChange, isMobile }) => {
+    return (
+      <div style={{
+        flex: isMobile ? '1 1 auto' : '1 1 0',
+        minWidth: isMobile ? 'auto' : '120px',
+        width: isMobile ? '100%' : 'auto',
+        textAlign: 'center',
+        display: 'flex',
+        alignItems: 'center',
+      }}>
+        <label style={{
+          display: isMobile ? 'inline-block' : 'block',
+          marginBottom: isMobile ? 0 : spacing.xs,
+          marginRight: isMobile ? spacing.md : 0,
+          fontSize: typography.fontSize.sm,
+          color: colors.text.secondary,
+          fontWeight: typography.fontWeight.medium,
+          width: isMobile ? '60px' : 'auto',
+          textAlign: isMobile ? 'left' : 'center',
+        }}>
+          {label}
+        </label>
+        <select 
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          style={selectStyle}
+        >
+          {options.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </div>
+    );
   };
 
   return (
     <div style={{
       display: 'flex',
-      flexDirection: 'row',
-      flexWrap: 'nowrap',
-      gap: spacing.md,
+      flexDirection: isMobile ? 'column' : 'row',
+      flexWrap: isMobile ? 'nowrap' : 'nowrap',
+      gap: isMobile ? spacing.sm : spacing.md,
       marginBottom: spacing.xl,
       justifyContent: 'space-between',
-      padding: spacing.md,
+      padding: isMobile ? spacing.sm : spacing.md,
       backgroundColor: colors.background,
       borderRadius: borderRadius.lg,
       boxShadow: colors.elevation.low,
-      overflowX: 'auto', // 允许在小屏幕上滚动
+      overflowX: isMobile ? 'visible' : 'auto', // 移动端不需要水平滚动
     }}>
-      <div style={{
-        flex: '1 1 0',
-        minWidth: '120px',
-        textAlign: 'center',
-        display: 'flex',
-        alignItems: 'center',
-      }}>
-        <label style={{
-          display: 'block',
-          marginBottom: spacing.xs,
-          fontSize: typography.fontSize.sm,
-          color: colors.text.secondary,
-          fontWeight: typography.fontWeight.medium,
-        }}>
-          城市
-        </label>
-        <select 
-          value={city}
-          onChange={(e) => setCity(e.target.value)}
-          style={selectStyle}
-        >
-          {cityOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      </div>
+      <FilterItem 
+        label="城市" 
+        value={city} 
+        options={cityOptions} 
+        onChange={setCity} 
+        isMobile={isMobile} 
+      />
 
-      <div style={{
-        flex: '1 1 0',
-        minWidth: '120px',
-        textAlign: 'center',
-        display: 'flex',
-        alignItems: 'center',
-      }}>
-        <label style={{
-          display: 'block',
-          marginBottom: spacing.xs,
-          fontSize: typography.fontSize.sm,
-          color: colors.text.secondary,
-          fontWeight: typography.fontWeight.medium,
-        }}>
-          区域
-        </label>
-        <select 
-          value={area}
-          onChange={(e) => setArea(e.target.value)}
-          style={selectStyle}
-        >
-          {areaOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      </div>
+      <FilterItem 
+        label="区域" 
+        value={area} 
+        options={areaOptions} 
+        onChange={setArea} 
+        isMobile={isMobile} 
+      />
 
-      <div style={{
-        flex: '1 1 0',
-        minWidth: '120px',
-        textAlign: 'center',
-        display: 'flex',
-        alignItems: 'center',
-      }}>
-        <label style={{
-          display: 'block',
-          marginBottom: spacing.xs,
-          fontSize: typography.fontSize.sm,
-          color: colors.text.secondary,
-          fontWeight: typography.fontWeight.medium,
-        }}>
-          距离
-        </label>
-        <select 
-          value={distanceRange}
-          onChange={(e) => setDistanceRange(e.target.value)}
-          style={selectStyle}
-        >
-          {distanceOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      </div>
+      <FilterItem
+        label="距离" 
+        value={distanceRange} 
+        options={distanceOptions} 
+        onChange={setDistanceRange} 
+        isMobile={isMobile} 
+      />
 
-      <div style={{
-        flex: '1 1 0',
-        minWidth: '120px',
-        textAlign: 'center',
-        display: 'flex',
-        alignItems: 'center',
-      }}>
-        <label style={{
-          display: 'block',
-          marginBottom: spacing.xs,
-          fontSize: typography.fontSize.sm,
-          color: colors.text.secondary,
-          fontWeight: typography.fontWeight.medium,
-        }}>
-          爬升
-        </label>
-        <select 
-          value={ascentRange}
-          onChange={(e) => setAscentRange(e.target.value)}
-          style={selectStyle}
-        >
-          {ascentOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      </div>
+      <FilterItem 
+        label="爬升" 
+        value={ascentRange} 
+        options={ascentOptions} 
+        onChange={setAscentRange} 
+        isMobile={isMobile} 
+      />
     </div>
   );
 };

@@ -2,10 +2,23 @@ import React from 'react';
 import { colors, spacing, typography } from './theme';
 
 const Footer: React.FC = () => {
+  const [isMobile, setIsMobile] = React.useState(false);
+
+  React.useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   return (
     <footer style={{
-      marginTop: spacing.xxl,
-      padding: `${spacing.xl} ${spacing.md}`,
+      marginTop: isMobile ? spacing.xl : spacing.xxl,
+      padding: isMobile ? `${spacing.lg} ${spacing.sm}` : `${spacing.xl} ${spacing.md}`,
       backgroundColor: colors.primary,
       color: 'white',
       textAlign: 'center',
